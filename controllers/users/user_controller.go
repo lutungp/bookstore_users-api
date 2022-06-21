@@ -22,6 +22,7 @@ func GetUser(c *gin.Context) {
 	user, getErr := services.GetUser(userId)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
+		return
 	}
 
 	c.JSON(http.StatusOK, user)
