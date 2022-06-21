@@ -1,10 +1,10 @@
 package users
 
 import (
-	"fmt"
 	"github/lutungp/bookstore_users-api/domain/users"
 	"github/lutungp/bookstore_users-api/services"
 	"net/http"
+	"strconv"
 
 	"github/lutungp/bookstore_users-api/utils/errors"
 
@@ -12,7 +12,19 @@ import (
 )
 
 func GetUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Implemented Me!")
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("invalid user id")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	user, getErr := services.GetUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 func CreateUser(c *gin.Context) {
@@ -21,14 +33,13 @@ func CreateUser(c *gin.Context) {
 		restErr := errors.NewBadRequestError("invalid json body")
 
 		c.JSON(restErr.Status, restErr)
-		fmt.Println(err.Error())
-
 		return
 	}
 
 	result, saveErr := services.CreateUser(user)
 	if saveErr != nil {
-		fmt.Println(saveErr)
+
+		c.JSON(saveErr.Status, saveErr)
 		return
 	}
 
