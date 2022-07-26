@@ -2,6 +2,8 @@ package users
 
 import (
 	"fmt"
+	"github/lutungp/bookstore_users-api/datasource/mysql/users_db"
+	"github/lutungp/bookstore_users-api/utils/date_utils"
 	"github/lutungp/bookstore_users-api/utils/errors"
 )
 
@@ -10,6 +12,10 @@ var (
 )
 
 func (user *User) Get() *errors.RestErr {
+	if err := users_db.Client.Ping(); err != nil {
+		panic(err)
+	}
+
 	result := usersDB[user.Id]
 	if result == nil {
 		return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.Id))
@@ -35,6 +41,8 @@ func (user *User) Save() *errors.RestErr {
 
 		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", user.Id))
 	}
+
+	user.DateCreated = date_utils.GetNowString()
 
 	usersDB[user.Id] = user
 
