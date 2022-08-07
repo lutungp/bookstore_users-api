@@ -15,7 +15,7 @@ var (
 	username = config.Config("DB_USERNAME")
 	password = config.Config("DB_PASSWORD")
 	host     = config.Config("DB_HOST")
-	schema   = config.Config("DB_SCHEMA")
+	schema   = config.Config("DB_NAME")
 )
 
 func init() {
