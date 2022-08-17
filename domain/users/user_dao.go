@@ -6,6 +6,8 @@ import (
 	"github/lutungp/bookstore_users-api/utils/date_utils"
 	"github/lutungp/bookstore_users-api/utils/errors"
 	"strings"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 const (
@@ -45,12 +47,19 @@ func (user *User) Save() *errors.RestErr {
 
 	user.DateCreated = date_utils.GetNowString()
 
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
-	if err != nil {
-		if strings.Contains(err.Error(), indexUniqueEmail) {
+	insertResult, savErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if savErr != nil {
+		sqlErr, ok := savErr.(*mysql.MySQLError)
+		if !ok {
+			return errors.NewInternalServerError(fmt.Sprintf("error when try to save user: %s", savErr.Error()))
+		}
+
+		switch sqlErr.Number {
+		case 1062:
 			return errors.NewBadRequestError(fmt.Sprintf("email %s already exist", user.Email))
 		}
-		return errors.NewInternalServerError(fmt.Sprintf("error when try to save user: %s", err.Error()))
+
+		return errors.NewInternalServerError(fmt.Sprintf("error when try to save user: %s", savErr.Error()))
 	}
 
 	userId, err := insertResult.LastInsertId()
