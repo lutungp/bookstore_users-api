@@ -25,3 +25,7 @@ func GetUser(userId int64) (*users.User, *errors.RestErr) {
 
 	return &result, nil
 }
+
+func UpdateUser(user users.User) (*users.User, *errors.RestErr) {
+
+}
